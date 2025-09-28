@@ -1,0 +1,33 @@
+[build]
+  command   = "npm run build"
+  publish   = "build"                 # CRA genera "build"
+  functions = "netlify/functions"     # Carpeta donde viven tus funciones (mail.js, hello.js)
+
+[functions]
+  node_bundler = "esbuild"            # Empaqueta nodemailer correctamente
+
+# ✅ Encabezados de seguridad (ajustados)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Permite tu dominio, assets de Supabase y data URIs
+    Content-Security-Policy = "default-src 'self'; img-src 'self' https://jszgeoosgpozjlvohrjy.supabase.co data:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://jszgeoosgpozjlvohrjy.functions.supabase.co https://jszgeoosgpozjlvohrjy.supabase.co wss://jszgeoosgpozjlvohrjy.supabase.co https://*.netlify.app"
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer-when-downgrade"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
+
+# ✅ Compatibilidad /api/* → redirige a la función correspondiente
+#    /api/mail → /.netlify/functions/mail
+[[redirects]]
+  from = "/api/*"
+  to   = "/.netlify/functions/:splat"
+  status = 200
+  force  = true
+
+# ⚠️ Si más adelante necesitas SPA fallback (para rutas de React al refrescar),
+#    añade este bloque AL FINAL, dejando SIEMPRE el redirect de /api/* encima.
+# [[redirects]]
+#   from = "/*"
+#   to   = "/index.html"
+#   status = 200
